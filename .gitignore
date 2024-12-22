@@ -1,0 +1,18 @@
+# Ignore Python bytecode files and etc
+__pycache__/
+*.py[cod]
+settings.json
+*.log
+
+# Ignore sql files
+backup.sql
+
+# Ignore virtual environment directories
+venv/
+.env/
+
+# Ignore VS Code settings and extensions
+.vscode/
+
+# Ignore other OS-specific files
+.DS_Store
