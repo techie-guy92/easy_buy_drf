@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 settings.json
 *.log
+.env
 
 # Ignore sql files
 backup.sql
