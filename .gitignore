@@ -8,7 +8,7 @@ requirements.txt
 
 
 # Ignore sql files
-backup.sql
+# backup.sql
 
 # Ignore virtual environment directories
 venv/
