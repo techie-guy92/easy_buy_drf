@@ -4,7 +4,6 @@ __pycache__/
 settings.json
 *.log
 .env
-requirements.txt
 
 
 # Ignore sql files
