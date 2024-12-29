@@ -52,7 +52,7 @@ class CustomUserManager(BaseUserManager):
 #======================================= CustomUser Model ===============================================
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    USER_TYPE = [("backend", "BackEnd"), ("frotend", "FrontEnd"), ("admin", "Admin"), ("premium", "Premium"), ("user", "User")]
+    USER_TYPE = [("backend", "BackEnd"), ("frotend", "FrontEnd"), ("admin", "Admin"), ("premium", "Premium"), ("user", "User"), ]
     username = models.CharField(max_length=30, unique=True, verbose_name="Username")
     first_name = models.CharField(max_length=30, verbose_name="First Nmae")
     last_name = models.CharField(max_length=30, verbose_name="Last Nmae")
@@ -65,6 +65,22 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     joined_at = models.DateTimeField(auto_now_add=True, editable=False, verbose_name="Joined At")
     updated_at = models.DateTimeField(auto_now=True, editable=False, verbose_name="Updated At")
 
+    # groups = models.ManyToManyField(
+    #     "auth.Group",
+    #     related_name="customuser_set",  
+    #     blank=True,
+    #     help_text="The groups this user belongs to.",
+    #     verbose_name="groups",
+    # )
+    
+    # user_permissions = models.ManyToManyField(
+    #     "auth.Permission",
+    #     related_name="customuser_permissions_set",  
+    #     blank=True,
+    #     help_text="Specific permissions for this user.",
+    #     verbose_name="user permissions",
+    # )
+
     def get_full_name(self):
         return f"{self.first_name} {self.last_name}"
 
@@ -76,7 +92,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         return self.is_admin
     
     USERNAME_FIELD = "username"
-    REQUIRED_FIELDS = ["username", "first_name", "last_name", "email"]
+    REQUIRED_FIELDS = ["first_name", "last_name", "email"]
     
     objects = CustomUserManager()
     
