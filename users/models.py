@@ -101,9 +101,9 @@ class UserProfile(models.Model):
 
 class PremiumSubscription(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL,  on_delete=models.CASCADE, related_name="PremiumSubscription_user", verbose_name="User")
+    status = models.BooleanField(default=False, verbose_name="Status")
     start_date = models.DateTimeField(verbose_name="Start Date")
     end_date = models.DateTimeField(verbose_name="End Date")
-    status = models.BooleanField(default=False, verbose_name="Status")
     
 
 #========================================================================================================
