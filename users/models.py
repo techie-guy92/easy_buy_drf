@@ -123,7 +123,7 @@ class PremiumSubscription(models.Model):
     end_date = models.DateTimeField(verbose_name="End Date")
 
     def __str__(self):
-        return f"{self.user.username} - {self.status}"
+        return f"{self.user.username} - {self.end_date}"
 
     class Meta:
         verbose_name = "PremiumSubscription"
