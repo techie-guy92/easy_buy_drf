@@ -93,11 +93,19 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(PremiumSubscription)
 class PremiumSubscriptionAdmin(admin.ModelAdmin):
-    list_display = ("user", "status", "start_date", "end_date",)
-    list_filter = ("status",)
+    list_display = ("user", "start_date", "end_date",)
     list_search = ("user",)
     ordering = ("user",)
-    list_editable = ("status",)
+    
+    
+#==================================== Premium Subscription Admin ================================
 
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ("payment_id", "subscription", "payment_status", "payment_date",)
+    list_filter = ("payment_status",)
+    list_search = ("payment_id",)
+    ordering = ("payment_id",)
+    
 
 #================================================================================================

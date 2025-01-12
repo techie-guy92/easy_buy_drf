@@ -105,19 +105,36 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.phone}"
 
-
+    class Meta:
+        verbose_name = "UserProfile"
+        verbose_name_plural = "UserProfiles"
+        indexes = [
+            models.Index(fields=["user"]),
+            models.Index(fields=["phone"]),
+            models.Index(fields=["gender"]),
+        ]
+        
+        
 #==================================== PremiumSubscription Model ==========================================
 
 class PremiumSubscription(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="PremiumSubscription_user", verbose_name="User")
-    status = models.BooleanField(default=False, verbose_name="Status")
     start_date = models.DateTimeField(verbose_name="Start Date")
     end_date = models.DateTimeField(verbose_name="End Date")
 
     def __str__(self):
         return f"{self.user.username} - {self.status}"
 
-
+    class Meta:
+        verbose_name = "PremiumSubscription"
+        verbose_name_plural = "PremiumSubscriptions"
+        indexes = [
+            models.Index(fields=["user"]),
+            models.Index(fields=["start_date"]),
+            models.Index(fields=["end_date"]),
+        ]
+        
+        
 #==================================== Payment Model ======================================================
 
 class Payment(models.Model):
@@ -139,5 +156,15 @@ class Payment(models.Model):
     def __str__(self):
         return f"Payment {self.payment_id} for {self.subscription.user.username}"
 
-
+    class Meta:
+        verbose_name = "Payment"
+        verbose_name_plural = "Payments"
+        indexes = [
+            models.Index(fields=["subscription"]),
+            models.Index(fields=["payment_id"]),
+            models.Index(fields=["payment_status"]),
+            models.Index(fields=["payment_date"]),
+        ]
+        
+        
 #========================================================================================================
