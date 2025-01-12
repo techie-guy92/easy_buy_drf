@@ -10,11 +10,11 @@ from .forms import *
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserForm
     
-    list_display = ("username", "first_name", "last_name", "email", "user_type", "is_active", "is_premium", "is_admin", "is_superuser", "joined_at",)
+    list_display = ("id", "username", "first_name", "last_name", "email", "user_type", "is_active", "is_premium", "is_admin", "is_superuser", "joined_at",)
     list_filter = ("user_type", "is_active", "is_premium", "is_admin", "is_superuser",)
     list_search = ("username",)
     list_editable = ()
-    ordering = ("last_name", "first_name",)
+    ordering = ("id",)
     
     def get_list_display(self, request):
         if request.user.is_superuser:
@@ -97,6 +97,7 @@ class PremiumSubscriptionAdmin(admin.ModelAdmin):
     list_filter = ("status",)
     list_search = ("user",)
     ordering = ("user",)
+    list_editable = ("status",)
 
 
 #================================================================================================

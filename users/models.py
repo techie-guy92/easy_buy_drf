@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.conf import settings
+from django.utils import timezone
 from os import path
 from uuid import uuid4
 
@@ -21,25 +22,24 @@ class CustomUserManager(BaseUserManager):
     def create_user(self, username, first_name, last_name, email, password=None):
         if not email:
             raise ValueError("وارد کردن ایمیل ضروری است.")
-        
         user = self.model(
-            username = username,
-            first_name = first_name.capitalize(),
-            last_name = last_name.capitalize(),
-            email = self.normalize_email(email),
+            username=username,
+            first_name=first_name.capitalize(),
+            last_name=last_name.capitalize(),
+            email=self.normalize_email(email),
         )
         user.set_password(password)
         user.user_type = "user"
         user.save(using=self._db)
         return user
-    
+
     def create_superuser(self, username, first_name, last_name, email, password=None):
         user = self.create_user(
-            username = username,
-            first_name = first_name,
-            last_name = last_name,
-            email = email,
-            password = password,
+            username=username,
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            password=password,
         )
         user.is_active = True
         user.is_admin = True
@@ -47,15 +47,21 @@ class CustomUserManager(BaseUserManager):
         user.user_type = "backend"
         user.save(using=self._db)
         return user
-
-
+    
+    
 #======================================= CustomUser Model ===============================================
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    USER_TYPE = [("backend", "BackEnd"), ("frotend", "FrontEnd"), ("admin", "Admin"), ("premium", "Premium"), ("user", "User"), ]
+    USER_TYPE = [
+        ("backend", "BackEnd"),
+        ("frontend", "FrontEnd"),
+        ("admin", "Admin"),
+        ("premium", "Premium"),
+        ("user", "User"),
+    ]
     username = models.CharField(max_length=30, unique=True, verbose_name="Username")
-    first_name = models.CharField(max_length=30, verbose_name="First Nmae")
-    last_name = models.CharField(max_length=30, verbose_name="Last Nmae")
+    first_name = models.CharField(max_length=30, verbose_name="First Name")
+    last_name = models.CharField(max_length=30, verbose_name="Last Name")
     email = models.EmailField(max_length=100, unique=True, verbose_name="Email")
     user_type = models.CharField(max_length=30, choices=USER_TYPE, default="user", verbose_name="User Type")
     is_active = models.BooleanField(default=False, verbose_name="Being Active")
@@ -74,12 +80,12 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     @property
     def is_staff(self):
         return self.is_admin
-    
+
     USERNAME_FIELD = "username"
     REQUIRED_FIELDS = ["first_name", "last_name", "email"]
-    
+
     objects = CustomUserManager()
-    
+
     class Meta:
         verbose_name = "Customer"
         verbose_name_plural = "Customers"
@@ -96,14 +102,42 @@ class UserProfile(models.Model):
     bio = models.TextField(blank=True, null=True, verbose_name="Bio")
     profile_picture = models.ImageField(upload_to=upload_to, blank=True, null=True, verbose_name="Profile Picture")
 
+    def __str__(self):
+        return f"{self.user.username} - {self.phone}"
 
-#==================================== PremiumSubscription Model =========================================
+
+#==================================== PremiumSubscription Model ==========================================
 
 class PremiumSubscription(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,  on_delete=models.CASCADE, related_name="PremiumSubscription_user", verbose_name="User")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="PremiumSubscription_user", verbose_name="User")
     status = models.BooleanField(default=False, verbose_name="Status")
     start_date = models.DateTimeField(verbose_name="Start Date")
     end_date = models.DateTimeField(verbose_name="End Date")
-    
+
+    def __str__(self):
+        return f"{self.user.username} - {self.status}"
+
+
+#==================================== Payment Model ======================================================
+
+class Payment(models.Model):
+    PAYMENT_STATUS = [("pending", "Pending"), ("completed", "Completed"), ("failed", "Failed")]
+    subscription = models.ForeignKey(PremiumSubscription, on_delete=models.CASCADE, related_name="Payment_subscription", verbose_name="Subscription")
+    payment_id = models.CharField(max_length=100, blank=True, null=True, verbose_name="Payment ID")
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=100.00, verbose_name="Amount")
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default="pending", verbose_name="Payment Status")
+    payment_date = models.DateTimeField(blank=True, null=True, verbose_name="Payment Date")
+
+    def process_payment(self, payment_id):
+        self.payment_id = payment_id
+        self.payment_date = timezone.now()
+        self.payment_status = "completed"
+        self.subscription.status = True
+        self.subscription.save()
+        self.save()
+
+    def __str__(self):
+        return f"Payment {self.payment_id} for {self.subscription.user.username}"
+
 
 #========================================================================================================
