@@ -70,6 +70,12 @@ class CustomUserAdmin(UserAdmin):
             return HttpResponseForbidden('<h1 style="color:black; text-align:center; margin-top:100px"> شما اجازه مشاهده برسی کردن صفحه دیگر ابر کاربر ها را ندارید </h1>')
         return super().change_view(request, object_id, form_url, extra_context)
 
+    class Media :
+        js = (
+            "https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js",
+            "js/admin_script.js",
+        )
+        
 admin.site.register(CustomUser, CustomUserAdmin)
 
 
