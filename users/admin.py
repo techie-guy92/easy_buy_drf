@@ -41,7 +41,7 @@ class CustomUserAdmin(UserAdmin):
                 ("Permissions", {"fields": ("user_permissions", "groups",)}),
             )
         elif request.user.is_admin:
-            add_fieldsets.append(("Status", {"fields": ("is_active")}))
+            add_fieldsets.append(("Status", {"fields": ("is_active",)}))
         return add_fieldsets
     
     def get_fieldsets(self, request, obj=None):
@@ -52,7 +52,7 @@ class CustomUserAdmin(UserAdmin):
                 ("Permissions", {"fields": ("user_permissions", "groups",)}),
             )
         elif request.user.is_admin:
-            fieldsets.append(("Status", {"fields": ("is_active")}))
+            fieldsets.append(("Status", {"fields": ("is_active",)}))
         return fieldsets
     
     filter_horizontal = ("user_permissions", "groups",)
@@ -65,9 +65,9 @@ class CustomUserAdmin(UserAdmin):
     def change_view(self, request, object_id, form_url = "", extra_context = None):
         user = CustomUser.objects.get(pk=object_id)
         if user != request.user and not request.user.is_superuser and user.is_admin:
-            return HttpResponseForbidden('<h1 style="color:red; text-align:center; margin-top:100px"> شما اجازه مشاهده برسی کردن صفحه دیگر ادمین ها را ندارید </h1>')
+            return HttpResponseForbidden('<h1 style="color:red; text-align:center; margin-top:100px"> شما اجازه مشاهده کردن صفحه دیگر ادمین ها را ندارید </h1>')
         if user != request.user and user.is_superuser:
-            return HttpResponseForbidden('<h1 style="color:black; text-align:center; margin-top:100px"> شما اجازه مشاهده برسی کردن صفحه دیگر ابر کاربر ها را ندارید </h1>')
+            return HttpResponseForbidden('<h1 style="color:black; text-align:center; margin-top:100px"> شما اجازه مشاهده کردن صفحه دیگر ابر کاربر ها را ندارید </h1>')
         return super().change_view(request, object_id, form_url, extra_context)
 
     class Media :

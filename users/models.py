@@ -146,8 +146,6 @@ class Payment(models.Model):
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default="pending", verbose_name="Payment Status")
     payment_date = models.DateTimeField(auto_now_add=True, verbose_name="Payment Date")
 
-    x = PremiumSubscription.objects.get_or_error()
-    
     def process_payment(self):
         if self.payment_status == "completed":
             self.user.is_premium = True
