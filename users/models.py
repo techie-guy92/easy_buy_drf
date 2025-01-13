@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.conf import settings
 from django.utils import timezone
+from datetime import datetime, timedelta
 from os import path
 from uuid import uuid4
 
@@ -123,7 +124,7 @@ class PremiumSubscription(models.Model):
     end_date = models.DateTimeField(verbose_name="End Date")
 
     def __str__(self):
-        return f"{self.user.username} - {self.end_date}"
+        return f"{self.user.username}"
 
     class Meta:
         verbose_name = "PremiumSubscription"
@@ -139,32 +140,42 @@ class PremiumSubscription(models.Model):
 
 class Payment(models.Model):
     PAYMENT_STATUS = [("pending", "Pending"), ("completed", "Completed"), ("failed", "Failed")]
-    subscription = models.ForeignKey(PremiumSubscription, on_delete=models.CASCADE, related_name="Payment_subscription", verbose_name="Subscription")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="payments", verbose_name="User") 
     payment_id = models.CharField(max_length=100, blank=True, null=True, verbose_name="Payment ID")
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=100.00, verbose_name="Amount")
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default="pending", verbose_name="Payment Status")
-    payment_date = models.DateTimeField(blank=True, null=True, verbose_name="Payment Date")
+    payment_date = models.DateTimeField(auto_now_add=True, verbose_name="Payment Date")
 
-    def process_payment(self, payment_id):
-        self.payment_id = payment_id
-        self.payment_date = timezone.now()
-        self.payment_status = "completed"
-        self.subscription.status = True
-        self.subscription.save()
-        self.save()
+    x = PremiumSubscription.objects.get_or_error()
+    
+    def process_payment(self):
+        if self.payment_status == "completed":
+            self.user.is_premium = True
+            # Use get_or_create to ensure a PremiumSubscription exists
+            # First Parameter (Lookup Parameters): This is where you specify the fields you want to use for looking up an existing object. In your case, it's user=self.user.
+            # Second Parameter (Defaults): The defaults parameter is a dictionary that defines default values to use when creating a new object. If the object already exists, the defaults values are ignored. If the object doesn't exist, a new one is created with these default values.
+            premium_sub, created = PremiumSubscription.objects.get_or_create(user=self.user, defaults={
+                'start_date': timezone.now(), 
+                'end_date': timezone.now() + timedelta(days=90)}
+            )
+            if not created:  # If the subscription already exists, update dates
+                premium_sub.start_date = timezone.now()
+                premium_sub.end_date = premium_sub.start_date + timedelta(days=90)
+            self.user.save()
+            premium_sub.save()
 
     def __str__(self):
-        return f"Payment {self.payment_id} for {self.subscription.user.username}"
+        return f"Payment {self.payment_id} for {self.user.username}"
 
     class Meta:
         verbose_name = "Payment"
         verbose_name_plural = "Payments"
         indexes = [
-            models.Index(fields=["subscription"]),
+            models.Index(fields=["user"]),  
             models.Index(fields=["payment_id"]),
             models.Index(fields=["payment_status"]),
             models.Index(fields=["payment_date"]),
         ]
         
-        
+
 #========================================================================================================

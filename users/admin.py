@@ -102,7 +102,7 @@ class PremiumSubscriptionAdmin(admin.ModelAdmin):
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
-    list_display = ("payment_id", "subscription", "payment_status", "payment_date",)
+    list_display = ("payment_id", "user", "payment_status", "payment_date",)
     list_filter = ("payment_status",)
     list_search = ("payment_id",)
     ordering = ("payment_id",)
