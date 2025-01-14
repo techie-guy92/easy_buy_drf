@@ -4,7 +4,7 @@ from django.utils import timezone
 from datetime import datetime, timedelta
 from django.conf import settings
 from .models import *
-from utiles import *
+from utilities import *
 
 
 #==================================== UpdateSubscription Model ==========================================

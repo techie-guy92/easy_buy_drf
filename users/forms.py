@@ -1,6 +1,6 @@
 from django import forms
-from re import compile
 from .models import CustomUser
+from utilities import *
 
 
 #======================================= Custom User Form ====================================
@@ -31,14 +31,12 @@ class CustomUserForm(forms.ModelForm):
         return pass2
 
     def clean_password(self):
-        passwordRe = compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*]).{8,}$")
         password = self.cleaned_data["password"]
         if not passwordRe.match(password):
             raise forms.ValidationError("رمز عبور باید متشکل از حروف کوچک، بزرگ و عدد باشد و همچنین هشت رقم داشته باشد.")
         return password
 
     def clean_email(self):
-        emailRe = compile(r"^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$")
         email = self.cleaned_data["email"]
         if not emailRe.match(email):
             raise forms.ValidationError("ایمیل معتبر نیست.")

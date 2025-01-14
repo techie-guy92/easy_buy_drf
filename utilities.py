@@ -1,10 +1,15 @@
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
+from re import compile
 from random import choice
 from string import ascii_letters, digits
 
 
 #======================================= Needed Methods =====================================
+
+passwordRe = compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*]).{8,}$")
+emailRe = compile(r"^[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}$")
+
 
 def code_generator(count):
     # characters = list(string.ascii_letters + string.digits + "!?@#$%&*")
@@ -15,7 +20,6 @@ def code_generator(count):
 def email_sender(subject, message, HTML_Content, to):
     sender = settings.EMAIL_HOST_USER
     message = EmailMultiAlternatives(subject, message, sender, to)
-    # message = EmailMultiAlternatives(Subject, Message, Sending_From, [To])
     message.attach_alternative(HTML_Content, "text/html")
     message.send()
     

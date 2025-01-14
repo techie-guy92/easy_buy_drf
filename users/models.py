@@ -53,13 +53,7 @@ class CustomUserManager(BaseUserManager):
 #======================================= CustomUser Model ===============================================
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    USER_TYPE = [
-        ("backend", "BackEnd"),
-        ("frontend", "FrontEnd"),
-        ("admin", "Admin"),
-        ("premium", "Premium"),
-        ("user", "User"),
-    ]
+    USER_TYPE = [("backend", "BackEnd"), ("frontend", "FrontEnd"), ("admin", "Admin"), ("premium", "Premium"), ("user", "User"),]
     username = models.CharField(max_length=30, unique=True, verbose_name="Username")
     first_name = models.CharField(max_length=30, verbose_name="First Name")
     last_name = models.CharField(max_length=30, verbose_name="Last Name")
