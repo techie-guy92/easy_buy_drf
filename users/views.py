@@ -6,9 +6,11 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import SearchFilter
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from django.db import transaction
 from drf_spectacular.utils import extend_schema
 from django.contrib.auth import authenticate
 from django.shortcuts import get_object_or_404
+from logging import getLogger
 from django.conf import settings
 from .models import *
 from .serializers import *
@@ -16,14 +18,37 @@ from custom_permission import UserCheckOut
 from utilities import code_generator, email_sender
 
 
-#======================================== Custom User View ===========================================
+#======================================== registration_email =======================================
+
+logger = getLogger(__name__)
+
+
+def registration_email(user):
+    try:
+        token = RefreshToken.for_user(user).access_token
+        domain = "127.0.0.1:8000"
+        verification_link = f"http://{domain}/users/verify-email?token={str(token)}"
+        subject = "Verify your email"
+        message = f"Click on the link to verify your email: {verification_link}"
+        html_content = f"<p>Hello dear {user.first_name} {user.last_name},<br><br>Please click on the link below to verify your email address:<br><a href='{verification_link}'>Verify Email</a><br><br>Thank you!</p>"
+        email_sender(subject, message, html_content, [user.email])
+    except Exception as error:
+        logger.error(f"Failed to send verification email to {user.email}: {error}")
+        raise
+
+
+#======================================== Sign Up View =============================================
 
 class SignUpAPIView(APIView):
     @extend_schema(
         request=CustomUserSerializer,
         responses={201: CustomUserSerializer}
     )
+    @transaction.atomic
     def post(self, request):
+        """
+        Handle user registration requests.
+        """
         username = request.data.get("username")
         email = request.data.get("email")
         if CustomUser.objects.filter(username=username).exists():
@@ -34,18 +59,12 @@ class SignUpAPIView(APIView):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            token = RefreshToken.for_user(user).access_token
-            domain = "127.0.0.1:8000"
-            verification_link = f"http://{domain}/users/verify-email?token={str(token)}"
-            subject = "Verify your email"
-            message = f"Click on the link to verify your email: {verification_link}"
-            html_content = f"<p>Hello dear {user.first_name} {user.last_name}<br><br></p>Click on the link to verify your email address: <a href='{verification_link}'>Verify Email</a>"
-            email_sender(subject, message, html_content, [user.email])
-            return Response({"message": "اطلاعات شما ثبت شد، برای تکمیل فرایند ثبت نام به ایمیل خود بروید و ایمل خود را تایید کنید."}, status=status.HTTP_201_CREATED)
+            registration_email(user)
+            return Response({"message": "اطلاعات شما ثبت شد، برای تکمیل فرایند ثبت نام به ایمیل خود بروید و ایمیل خود را تایید کنید."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     
-#======================================= Verify Email View ===========================================
+#======================================= Resend Verification Email View =============================
 
 class ResendVerificationEmailAPIView(APIView):
     @extend_schema(
@@ -53,22 +72,21 @@ class ResendVerificationEmailAPIView(APIView):
         responses={201: None}
     )
     def post(self, request):
+        """
+        Resend verification email to the user.
+        """
         username = request.data.get("username")
         try:
             user = CustomUser.objects.get(username=username)
             if user.is_active:
                 return Response({"message": "ایمیل شما قبلا تایید شده است."}, status=status.HTTP_200_OK)
-            token = RefreshToken.for_user(user).access_token
-            domain = "127.0.0.1:8000"
-            verification_link = f"http://{domain}/users/verify-email?token={str(token)}"
-            subject = "Verify your email"
-            message = f"Click on the link to verify your email: {verification_link}"
-            html_content = f"<p>Hello dear {user.first_name} {user.last_name}<br><br></p>Click on the link to verify your email address: <a href='{verification_link}'>Verify Email</a>"
-            email_sender(subject, message, html_content, [user.email])
+            registration_email(user)
             return Response({"message": "ایمیل تایید دوباره ارسال شد."}, status=status.HTTP_201_CREATED)
         except CustomUser.DoesNotExist:
             return Response({"error": "نام کاربری مورد نظر یافت نشد."}, status=status.HTTP_400_BAD_REQUEST)
 
+
+#======================================= Verify Email View ===========================================
   
 class VerifyEmailAPIView(APIView):
     @extend_schema(
@@ -76,6 +94,9 @@ class VerifyEmailAPIView(APIView):
         responses={201: None}
     )
     def get(self, request):
+        """
+        Verify user's email using the token provided.
+        """
         token = request.GET.get("token")
         try:
             payload = AccessToken(token).payload
@@ -92,7 +113,7 @@ class VerifyEmailAPIView(APIView):
                 user.is_active = True
                 user.save()
                 return Response({"message": "ثبت نام شما کامل شد."}, status=status.HTTP_200_OK)
-            return Response({"message": "کاربر قبلا تایید شده است."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": f"کاربر {user.username} قبلا تایید شده است."}, status=status.HTTP_400_BAD_REQUEST)
         except TokenError:
             return Response({"error": "توکن معتبر نیست."}, status=status.HTTP_400_BAD_REQUEST)
 

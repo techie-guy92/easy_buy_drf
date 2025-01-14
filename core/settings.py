@@ -13,7 +13,6 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from os import path
 from datetime import timedelta
-import logging
 import environ
 
 
