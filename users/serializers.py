@@ -122,7 +122,9 @@ class SetNewPasswordSerializer(serializers.Serializer):
 #======================================= Fetch Users Serializer ====================================
 
 class FetchUsersSerializer(serializers.ModelSerializer):
-    pass
+     class Meta:
+         model = CustomUser
+         fields = ["id", "username", "first_name", "last_name", "email", "is_active", "user_type", "joined_at"]
 
 
 #===================================================================================================

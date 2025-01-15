@@ -1,9 +1,11 @@
 from django.urls import path, re_path, include
 from rest_framework.routers import DefaultRouter
 from .views import (SignUpAPIView, ResendVerificationEmailAPIView, VerifyEmailAPIView,
-                    UserProfileAPIView, LoginAPIView, UpdateUserAPIView)
+                    UserProfileAPIView, LoginAPIView, UpdateUserAPIView, FetchUsersViewSet)
 
 router = DefaultRouter()
+router.register(r"fetch-users", FetchUsersViewSet, basename="fetch-users")
+
 
 urlpatterns = [
     path("signup/", SignUpAPIView.as_view(), name="signup"),

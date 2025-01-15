@@ -191,6 +191,13 @@ class UpdateUserAPIView(APIView):
 
 #======================================= Fetch Users View ============================================
 
+class FetchUsersViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAdminUser]
+    queryset = CustomUser.objects.all().order_by("id")
+    serializer_class = FetchUsersSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = [SearchFilter]
+    search_fields = ["id", "username", "first_name", "last_name"]
 
 
 #=====================================================================================================
