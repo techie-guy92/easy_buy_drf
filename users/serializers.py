@@ -3,13 +3,6 @@ from .models import *
 from utilities import *
 
 
-# {
-#     "first_name": "Mohammad",
-#     "last_name": "Saedi",
-#     "password": "Soheil0014@",
-#     "re_password": "Soheil0014@"
-# }
-
 #======================================= Custom User Serializer ====================================
 
 class CustomUserSerializer(serializers.ModelSerializer):
@@ -112,11 +105,28 @@ class UpdateUserSerializer(serializers.ModelSerializer):
 #======================================= Forget Password Serializer ================================
 
 class PasswordResetSerializer(serializers.Serializer):
-    pass
+    email = serializers.EmailField()
 
 
 class SetNewPasswordSerializer(serializers.Serializer):
-    pass
+    password = serializers.CharField(max_length=20, write_only=True)
+    re_password = serializers.CharField(max_length=20, write_only=True)
+    token = serializers.CharField(write_only=True)
+    
+    def validate(self, attrs):
+        password = attrs.get("password")
+        re_password = attrs.get("re_password")
+        if password != re_password:
+            raise serializers.ValidationError("رمز عبور و تکرار آن یکسان نمی باسد.")
+        if not passwordRe.match(password):
+            raise serializers.ValidationError("رمز عبور باید متشکل از حروف کوچک، بزرگ و عدد باشد و همچنین هشت رقم داشته باشد.")
+        return attrs
+    
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        data.pop("password", None)
+        data.pop("re_password", None)
+        return data
 
 
 #======================================= Fetch Users Serializer ====================================

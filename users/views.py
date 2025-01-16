@@ -4,18 +4,16 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import SearchFilter
-from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken, TokenError
+from rest_framework_simplejwt.exceptions import InvalidToken
 from django.db import transaction
 from drf_spectacular.utils import extend_schema
 from django.contrib.auth import authenticate
-from django.shortcuts import get_object_or_404
 from logging import getLogger
-from django.conf import settings
 from .models import *
 from .serializers import *
 from custom_permission import UserCheckOut
-from utilities import code_generator, email_sender
+from utilities import email_sender
 
 
 #======================================== registration_email =======================================
@@ -23,14 +21,29 @@ from utilities import code_generator, email_sender
 logger = getLogger(__name__)
 
 
-def registration_email(user):
+def confirm_email_address(user):
     try:
+        # It generates a refresh token at first, then generates an access token.
         token = RefreshToken.for_user(user).access_token
         domain = "127.0.0.1:8000"
         verification_link = f"http://{domain}/users/verify-email?token={str(token)}"
         subject = "Verify your email"
         message = f"Click on the link to verify your email: {verification_link}"
         html_content = f"<p>Hello dear {user.first_name} {user.last_name},<br><br>Please click on the link below to verify your email address:<br><a href='{verification_link}'>Verify Email</a><br><br>Thank you!</p>"
+        email_sender(subject, message, html_content, [user.email])
+    except Exception as error:
+        logger.error(f"Failed to send verification email to {user.email}: {error}")
+        raise
+    
+def reset_password_email(user):
+    try:
+        # It generates just an access token which is good for short-term validity.
+        token = AccessToken.for_user(user) 
+        domain = "127.0.0.1:8000"
+        verification_link = f"http://{domain}/users/set-new-password?token={str(token)}"
+        subject = "Password Reset Request"
+        message = f"Click on the link to reset your password: {verification_link}"
+        html_content = f"<p>Hello dear {user.first_name} {user.last_name},<br><br>Please click on the link below to reset your password:<br><a href='{verification_link}'>Reset Password</a><br><br>Thank you!</p>"
         email_sender(subject, message, html_content, [user.email])
     except Exception as error:
         logger.error(f"Failed to send verification email to {user.email}: {error}")
@@ -59,7 +72,7 @@ class SignUpAPIView(APIView):
         serializer = CustomUserSerializer(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
-            registration_email(user)
+            confirm_email_address(user)
             return Response({"message": "اطلاعات شما ثبت شد، برای تکمیل فرایند ثبت نام به ایمیل خود بروید و ایمیل خود را تایید کنید."}, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -80,7 +93,7 @@ class ResendVerificationEmailAPIView(APIView):
             user = CustomUser.objects.get(username=username)
             if user.is_active:
                 return Response({"message": "ایمیل شما قبلا تایید شده است."}, status=status.HTTP_200_OK)
-            registration_email(user)
+            confirm_email_address(user)
             return Response({"message": "ایمیل تایید دوباره ارسال شد."}, status=status.HTTP_201_CREATED)
         except CustomUser.DoesNotExist:
             return Response({"error": "نام کاربری مورد نظر یافت نشد."}, status=status.HTTP_400_BAD_REQUEST)
@@ -114,8 +127,10 @@ class VerifyEmailAPIView(APIView):
                 user.save()
                 return Response({"message": "ثبت نام شما کامل شد."}, status=status.HTTP_200_OK)
             return Response({"message": f"کاربر {user.username} قبلا تایید شده است."}, status=status.HTTP_400_BAD_REQUEST)
+        except InvalidToken:
+                return Response({"error": "توکن معنبر نیست."}, status=status.HTTP_400_BAD_REQUEST)
         except TokenError:
-            return Response({"error": "توکن معتبر نیست."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "توکن منقضی شده است."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 #======================================= Login View ==================================================
@@ -187,6 +202,58 @@ class UpdateUserAPIView(APIView):
 
 #======================================= Forget Password View ========================================
 
+class PasswordResetAPIView(APIView):
+    @extend_schema(
+        request=PasswordResetSerializer,
+        responses={201: PasswordResetSerializer}
+    )
+    def post(self, request):
+        """
+        Handle to get user's email and send an email to change password.
+        """
+        serializer = PasswordResetSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data["email"]
+            try:
+              user = CustomUser.objects.get(email=email)
+              reset_password_email(user)
+              return Response({"message": "ایمیل برای تغییر رمز عبور ارسال شد."}, status=status.HTTP_200_OK)
+            except CustomUser.DoesNotExist:
+              return Response({"error": "ایمیل وارد شده معنبر نمی باشد."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+  
+  
+class SetNewPasswordAPIView(APIView):
+    @extend_schema(
+        request=SetNewPasswordSerializer,
+        responses={201: SetNewPasswordSerializer}
+    )
+    def post(self, request):
+        """
+        Verify user's email using the token provided and then make password hash.
+        """
+        serializer = SetNewPasswordSerializer(data=request.data)
+        if serializer.is_valid():
+            token = serializer.validated_data["token"]
+            password = serializer.validated_data["password"]
+            try:
+                payload = AccessToken(token).payload
+                user_id = payload.get("user_id")
+                if not user_id:
+                    return Response({"error": "توکن معتبر نیست و یا منقضی شده است."}, status=status.HTTP_400_BAD_REQUEST)
+                user = CustomUser.objects.get(pk=user_id)
+                user.set_password(password)
+                user.save()
+                return Response({"message": "رمز عبور با موفقیت تغییر کرد."}, status=status.HTTP_200_OK)
+            except CustomUser.DoesNotExist:
+                return Response({"error": "کاربر یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
+            except InvalidToken:
+                return Response({"error": "توکن معتبر نیست."}, status=status.HTTP_400_BAD_REQUEST)
+            except TokenError:
+                return Response({"error": "توکن منقضی شده است."}, status=status.HTTP_400_BAD_REQUEST)
+            except Exception as error:
+                return Response({"error": str(error)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 #======================================= Fetch Users View ============================================
