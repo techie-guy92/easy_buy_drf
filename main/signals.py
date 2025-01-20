@@ -9,14 +9,14 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
-def send_approval_email(user):
+def send_approval_email(user, product):
     try:
         verification_link = "http://127.0.0.1:8000"
         subject = "Your product has been approved"
-        message = "The product you incorporate to sell has been approved."
+        message = "The product you incorporated to sell has been approved."
         html_content = f"""
-            <p>Hello dear {user.first_name} {user.last_name},<br><br>
-            The product you incorporate to sell has been approved, you can check it out.<br>
+            <p>Hello {user.first_name} {user.last_name},<br><br>
+            We're excited to let you know that your product, '{product}', has been approved! You can now check it out on Easy Buy.<br>
             <a href='{verification_link}'>Go to Easy Buy</a><br><br>
             Thank you for choosing us!</p>
         """
@@ -28,7 +28,7 @@ def send_approval_email(user):
 @receiver(post_save, sender=Product)
 def update_product(sender, instance, **kwargs):
     if instance.is_active:
-        send_approval_email(instance.user)
+        send_approval_email(instance.user, instance.product)
 
 
 #========================================================================================================
