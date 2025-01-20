@@ -27,15 +27,19 @@ def upload_to(instance, filename):
 #======================================= Category Model =====================================================
 
 class Category(models.Model):
-    category =models.CharField(max_length=30, verbose_name="Category")
+    category =models.CharField(max_length=100, verbose_name="Category")
     parent = models.ForeignKey("Category", on_delete=models.CASCADE, related_name="Category_parent", blank=True, null=True, verbose_name="Parent")
     slug = models.SlugField(unique=True, verbose_name="Slug")
     description = models.TextField(blank=True, null=True, verbose_name="Description")
     image= models.ImageField(upload_to=upload_to, blank=True, null=True, verbose_name="Image")
     
+    def category_name(self):
+        category_part_1,  category_part_2= self.category.split("-")
+        return category_part_1
+      
     def __str__(self):
-        return self.category
-    
+        return self.category_name()
+
     class Meta:
         verbose_name = "Category"
         verbose_name_plural = "Categories"

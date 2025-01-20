@@ -3,6 +3,7 @@ from django.conf import settings
 from re import compile
 from random import choice
 from string import ascii_letters, digits
+from django.utils.text import slugify
 
 
 #======================================= Needed Methods =====================================
@@ -16,6 +17,7 @@ def code_generator(count):
     characters = list(ascii_letters + digits)
     code_list = [choice(characters) for _ in range(count)]
     return "".join(code_list)
+    
     
 def email_sender(subject, message, HTML_Content, to):
     sender = settings.EMAIL_HOST_USER

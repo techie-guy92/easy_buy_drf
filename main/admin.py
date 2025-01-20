@@ -6,17 +6,20 @@ from .models import *
 
 @admin.register(Category)
 class  CategoryAdmin(admin.ModelAdmin):
-    list_display = ("id", "category", "parent", "slug")
+    list_display = ("id", "category_name", "parent", "slug",)
     list_filter = ("parent",)
     list_search = ("category",)
     ordering = ("category",)
+    
+    def category_name(self, obj):
+        return obj.category_name()
 
 
 #==================================== Product Admin ========================================
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ("product", "user", "id", "category", "slug", "price", "is_active", "willing_exchange", "created_at")
+    list_display = ("product", "user", "id", "category", "slug", "price", "is_active", "willing_exchange", "created_at",)
     list_filter = ("is_active",)
     list_search = ("product", "user", "id",)
     list_editable = ("is_active",)
