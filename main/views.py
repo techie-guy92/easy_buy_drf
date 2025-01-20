@@ -15,16 +15,6 @@ from .models import *
 from .serializers import *
 from utilities import email_sender
 
-#======================================== registration_email =======================================
-
-# {
-#     "category": 4,
-#     "product": "پراید 132",
-#     "slug": "pride-132",
-#     "price": 240000000,
-#     "willing_exchange": "False",
-#     "description": "بدون خط و خش"
-# }
 
 #======================================== Product Add View =========================================
         
@@ -37,7 +27,7 @@ class ProductAddAPIView(APIView):
     @transaction.atomic
     def post(self, request):
         """
-        Users can add products.
+        Allows authenticated users to add new products.
         """
         # Get the product name from request.data
         # product_name = request.data.get("product", "")
@@ -46,7 +36,7 @@ class ProductAddAPIView(APIView):
         serializer = ProductSerializer(data=data)
         if serializer.is_valid():
             product = serializer.save()
-            category_name = str(product.category)
+            # category_name = str(product.category)
             product_name = str(product.product)
             slug = f"{request.user.username}-{product_name}-{product.id}"
             product.slug = slugify(slug, allow_unicode=True)
@@ -58,6 +48,24 @@ class ProductAddAPIView(APIView):
 #======================================== Product Display View =====================================
 
 class ProductDisplayViewSet(viewsets.ModelViewSet):
+    """
+    A viewset that provides the standard actions to display all products.
+    This viewset supports ordering, pagination, and searching.
+
+    URL examples:
+    - Display all products: /products/
+    - Display a single product by slug: /products/<slug>/
+
+    Fields for search:
+    - id
+    - product
+    - user
+    - category
+    - slug
+
+    Permissions:
+    - Access is restricted to authenticated users.
+    """
     # permission_classes = [IsAuthenticated]
     queryset = Product.objects.all().order_by("id")
     serializer_class = ProductSerializer
@@ -65,6 +73,7 @@ class ProductDisplayViewSet(viewsets.ModelViewSet):
     filter_backends = [SearchFilter]
     search_fields = ["id", "product", "user", "category", "slug"]
     lookup_field = "slug"
+
     
     
 #===================================================================================================

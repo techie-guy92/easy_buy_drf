@@ -4,7 +4,7 @@ from .views import ProductAddAPIView, ProductDisplayViewSet
 
 router = DefaultRouter()
 # router.register(r"product-add", ProductAddAPIView, basename="product-add")
-router.register(r"product-display", ProductDisplayViewSet, basename="product-display")
+router.register(r"product", ProductDisplayViewSet, basename="product")
 
 
 urlpatterns = [
