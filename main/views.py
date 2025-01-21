@@ -62,7 +62,7 @@ class ProductDisplayViewSet(viewsets.ModelViewSet):
     Permissions:
     - Access is restricted to authenticated users.
     """
-    # permission_classes = [UserCheckOutPremium]
+    permission_classes = [IsAuthenticated]
     queryset = Product.objects.all().order_by("id")
     serializer_class = ProductSerializer
     pagination_class = PageNumberPagination
@@ -70,7 +70,18 @@ class ProductDisplayViewSet(viewsets.ModelViewSet):
     search_fields = ["id", "product", "user", "category", "slug"]
     lookup_field = "slug"
 
-    
+
+#======================================== Product Display View =====================================
+
+class ProductDetailViewSet(viewsets.ReadOnlyModelViewSet):
+    # permission_classes = [UserCheckOutPremium]
+    queryset = Product.objects.all()
+    serializer_class = ProductDetailSerializer
+    lookup_field = "slug"
+
+    def get_queryset(self):
+        return self.queryset.filter(is_active=True)
+
     
 #===================================================================================================
 # Certainly! Adding `lookup_field = 'slug'` to your `ProductDisplayViewSet` tells Django REST Framework (DRF) to use the `slug` field instead of the default `id` field when performing lookups for single objects.
