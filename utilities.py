@@ -26,4 +26,9 @@ def email_sender(subject, message, HTML_Content, to):
     message.send()
     
     
+def replace_dash_to_space(title):
+        new_title="".join([eliminator.replace(" ","-") for eliminator in title])
+        return new_title.lower()
+    
+    
 #============================================================================================

@@ -4,16 +4,12 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.filters import SearchFilter
-from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from django.utils.text import slugify
 from django.db import transaction
 from drf_spectacular.utils import extend_schema
-from django.contrib.auth import authenticate
-from logging import getLogger 
 from .models import *
 from .serializers import *
-from utilities import email_sender
+from custom_permission import UserCheckOutPremium
 
 
 #======================================== Product Add View =========================================
@@ -38,7 +34,7 @@ class ProductAddAPIView(APIView):
             product = serializer.save()
             # category_name = str(product.category)
             product_name = str(product.product)
-            slug = f"{request.user.username}-{product_name}-{product.id}"
+            slug = f"{request.user.username}-{product_name}"
             product.slug = slugify(slug, allow_unicode=True)
             product.save()
             return Response({"message": "محصول شما ثبت شد، و پس از تایید کارشناسان درج خواهد شد."}, status=status.HTTP_201_CREATED)
@@ -66,7 +62,7 @@ class ProductDisplayViewSet(viewsets.ModelViewSet):
     Permissions:
     - Access is restricted to authenticated users.
     """
-    # permission_classes = [IsAuthenticated]
+    # permission_classes = [UserCheckOutPremium]
     queryset = Product.objects.all().order_by("id")
     serializer_class = ProductSerializer
     pagination_class = PageNumberPagination

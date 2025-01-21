@@ -1,7 +1,7 @@
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from .models import *
-from utilities import email_sender
+from utilities import email_sender, replace_dash_to_space
 from logging import getLogger
 
 
@@ -9,9 +9,10 @@ from logging import getLogger
 
 logger = getLogger(__name__)
 
+
 def send_approval_email(user, product):
     try:
-        verification_link = "http://127.0.0.1:8000"
+        verification_link = f"http://127.0.0.1:8000/product/{user.username}-{replace_dash_to_space(product)}/"
         subject = "Your product has been approved"
         message = "The product you incorporated to sell has been approved."
         html_content = f"""

@@ -2,8 +2,10 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.request import Request
 
 
+#======================================== User Check Out ============================================
+
 class UserCheckOut(BasePermission):
-    message = "You are not allowed"
+    message = "You are not allowed."
     
     # Checks if the user is authenticated for all types of requests.
     def has_permission(self, request: Request, view):
@@ -18,4 +20,19 @@ class UserCheckOut(BasePermission):
         return obj == request.user or obj.user == request.user
 
 
+#======================================== User Check Out Premium ====================================
 
+class UserCheckOutPremium(BasePermission):
+    message = "You are not allowed, you need to have a premium account."
+
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in SAFE_METHODS:
+            return True
+        
+        return request.user.is_premium
+
+    
+#=====================================================================================================
