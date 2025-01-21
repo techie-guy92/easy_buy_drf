@@ -74,7 +74,7 @@ class ProductDisplayViewSet(viewsets.ModelViewSet):
 #======================================== Product Display View =====================================
 
 class ProductDetailViewSet(viewsets.ReadOnlyModelViewSet):
-    # permission_classes = [UserCheckOutPremium]
+    permission_classes = [UserCheckOutPremium]
     queryset = Product.objects.all()
     serializer_class = ProductDetailSerializer
     lookup_field = "slug"
