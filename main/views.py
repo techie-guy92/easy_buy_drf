@@ -7,6 +7,7 @@ from rest_framework.filters import SearchFilter
 from django.utils.text import slugify
 from django.db import transaction
 from drf_spectacular.utils import extend_schema
+from django.shortcuts import get_object_or_404
 from .models import *
 from .serializers import *
 from custom_permission import UserCheckOutPremium
@@ -43,7 +44,7 @@ class ProductAddAPIView(APIView):
 
 #======================================== Product Display View =====================================
 
-class ProductDisplayViewSet(viewsets.ModelViewSet):
+class ProductDisplayViewSet(viewsets.ReadOnlyModelViewSet):
     """
     A viewset that provides the standard actions to display all products.
     This viewset supports ordering, pagination, and searching.
@@ -61,6 +62,10 @@ class ProductDisplayViewSet(viewsets.ModelViewSet):
 
     Permissions:
     - Access is restricted to authenticated users.
+    
+    Methods:
+        get_queryset():
+            Filters the initial queryset to only include active products.
     """
     permission_classes = [IsAuthenticated]
     queryset = Product.objects.all().order_by("id")
@@ -68,13 +73,34 @@ class ProductDisplayViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = [SearchFilter]
     search_fields = ["id", "product", "user", "category", "slug"]
+    # By default, viewsets use the primary key (id) to retrieve individual objects. 
+    # When it specifies `lookup_field = 'slug'`, DRF knows to use the `slug` field for these lookups.
     lookup_field = "slug"
+    
+    def get_queryset(self):
+        return self.queryset.filter(is_active=True)   
 
 
-#======================================== Product Display View =====================================
+#======================================== Product Detail View =======================================
 
 class ProductDetailViewSet(viewsets.ReadOnlyModelViewSet):
-    permission_classes = [UserCheckOutPremium]
+    """
+    A viewset that provides the detailed view of a product.
+
+    Attributes:
+        permission_classes: Only premium users can access this viewset.
+        serializer_class: The serializer class used to represent the product details and seller information.
+        lookup_field: The field used to look up a product by its slug.
+
+    URL examples:
+    - Display a single product by slug: /product/<slug>/
+    - This viewset displays a single product, not a list of products. 
+
+    Methods:
+        get_queryset():
+            Filters the initial queryset to only include active products.
+    """
+    permission_classes = [IsAuthenticated, UserCheckOutPremium]
     queryset = Product.objects.all()
     serializer_class = ProductDetailSerializer
     lookup_field = "slug"
@@ -82,15 +108,34 @@ class ProductDetailViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         return self.queryset.filter(is_active=True)
 
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.check_object_permissions(request, instance)
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)
+
+
+# class ProductDetailAPIView(APIView):
+#     """
+#     View to retrieve a detailed view of a product.
     
+#     Attributes:
+#         permission_classes: List of permission classes for the view.
+
+#     URL examples:
+#     - Display a single product by slug: /product/<slug>/
+    
+#     Methods:
+#         get():
+#             Retrieves a single active product by its slug.
+#     """
+#     permission_classes = [IsAuthenticated, UserCheckOutPremium]
+
+#     def get(self, request, slug):
+#         product = get_object_or_404(Product.objects.filter(is_active=True), slug=slug)
+#         self.check_object_permissions(request, product)
+#         serializer = ProductDetailSerializer(product)
+#         return Response(serializer.data)
+
+
 #===================================================================================================
-# Certainly! Adding `lookup_field = 'slug'` to your `ProductDisplayViewSet` tells Django REST Framework (DRF) to use the `slug` field instead of the default `id` field when performing lookups for single objects.
-
-# By default, DRF viewsets use the primary key (usually `id`) to retrieve individual objects. When you specify `lookup_field = 'slug'`, DRF knows to use the `slug` field for these lookups. This is why the URL `http://127.0.0.1:8000/product-display/mehdi_abbasi-پراید-هاچبک-11/` works when you use the slug to identify the product.
-
-# Here's a quick summary of how it works:
-# - **Default Behavior**: DRF looks up objects using their primary key (`id`). For example, `http://127.0.0.1:8000/product-display/1/` would retrieve the product with `id` 1.
-# - **Custom Lookup Field**: By setting `lookup_field = 'slug'`, DRF looks up objects using the `slug` field instead. So, `http://127.0.0.1:8000/product-display/mehdi_abbasi-پراید-هاچبک-11/` retrieves the product with that specific slug.
-
-# This customization is useful when you want to use more descriptive and user-friendly URLs based on fields other than the primary key. In your case, using slugs allows you to create URLs that are meaningful and SEO-friendly, while ensuring they remain unique and valid for database lookups.
-

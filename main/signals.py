@@ -12,7 +12,7 @@ logger = getLogger(__name__)
 
 def send_approval_email(user, product):
     try:
-        verification_link = f"http://127.0.0.1:8000/product/{user.username}-{replace_dash_to_space(product)}/"
+        verification_link = f"http://127.0.0.1:8000/product/{user.username}-{replace_dash_to_space(product)}/?next=/product/{user.username}-{replace_dash_to_space(product)}/"
         subject = "Your product has been approved"
         message = "The product you incorporated to sell has been approved."
         html_content = f"""
@@ -22,6 +22,7 @@ def send_approval_email(user, product):
             Thank you for choosing us!</p>
         """
         email_sender(subject, message, html_content, [user.email])
+        print(verification_link)
     except Exception as error:
         logger.error(f"Failed to send approval email to {user.email}: {error}")
         raise
