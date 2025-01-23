@@ -50,7 +50,7 @@ class Category(models.Model):
         ]
     
 
-#======================================= Ptoduct Model ======================================================
+#======================================= Product Model ======================================================
 
 class Product(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="Product_user", verbose_name="User")

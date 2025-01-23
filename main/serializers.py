@@ -1,7 +1,6 @@
 from rest_framework import serializers
 from .models import *
 from users.models import CustomUser, UserProfile
-from users.serializers import CustomUserSerializer, UserProfileSerializer
 
 
 #======================================== Product Serializer =======================================

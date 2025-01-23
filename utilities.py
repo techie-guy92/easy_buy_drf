@@ -3,7 +3,6 @@ from django.conf import settings
 from re import compile
 from random import choice
 from string import ascii_letters, digits
-from django.utils.text import slugify
 
 
 #======================================= Needed Methods =====================================

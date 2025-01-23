@@ -1,8 +1,10 @@
 from django.urls import path, re_path, include
 from rest_framework.routers import DefaultRouter
-from .views import (SignUpAPIView, ResendVerificationEmailAPIView, VerifyEmailAPIView,
-                    UserProfileAPIView, LoginAPIView, UpdateUserAPIView, 
-                    PasswordResetAPIView,SetNewPasswordAPIView, FetchUsersViewSet,)
+from .views import (
+    SignUpAPIView, ResendVerificationEmailAPIView, VerifyEmailAPIView, 
+    UserProfileAPIView, LoginAPIView, UpdateUserAPIView, 
+    PasswordResetAPIView,SetNewPasswordAPIView, FetchUsersViewSet,
+    )
 
 router = DefaultRouter()
 router.register(r"fetch-users", FetchUsersViewSet, basename="fetch-users")

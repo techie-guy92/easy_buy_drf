@@ -16,7 +16,7 @@ from custom_permission import CheckOwnershipPermission
 from utilities import email_sender
 
 
-#======================================== registration_email =======================================
+#======================================== email senders ============================================
 
 logger = getLogger(__name__)
 
@@ -265,6 +265,7 @@ class FetchUsersViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
     filter_backends = [SearchFilter]
     search_fields = ["id", "username", "first_name", "last_name"]
+    lookup_field = "username"
 
 
 #=====================================================================================================

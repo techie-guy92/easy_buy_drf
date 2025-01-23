@@ -1,8 +1,5 @@
 from django.dispatch import receiver
 from django.db.models.signals import post_save
-from django.utils import timezone
-from datetime import datetime, timedelta
-from django.conf import settings
 from .models import *
 from utilities import *
 
