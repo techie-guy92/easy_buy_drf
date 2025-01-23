@@ -10,7 +10,7 @@ from drf_spectacular.utils import extend_schema
 from django.shortcuts import get_object_or_404
 from .models import *
 from .serializers import *
-from custom_permission import UserCheckOutPremium
+from custom_permission import IsPremiumOrOwnerPermission
 
 
 #======================================== Product Add View =========================================
@@ -100,7 +100,7 @@ class ProductDetailViewSet(viewsets.ReadOnlyModelViewSet):
         get_queryset():
             Filters the initial queryset to only include active products.
     """
-    permission_classes = [IsAuthenticated, UserCheckOutPremium]
+    permission_classes = [IsPremiumOrOwnerPermission]
     queryset = Product.objects.all()
     serializer_class = ProductDetailSerializer
     lookup_field = "slug"

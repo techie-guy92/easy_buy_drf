@@ -12,7 +12,7 @@ from django.contrib.auth import authenticate
 from logging import getLogger
 from .models import *
 from .serializers import *
-from custom_permission import UserCheckOut
+from custom_permission import CheckOwnershipPermission
 from utilities import email_sender
 
 
@@ -181,7 +181,7 @@ class UserProfileAPIView(APIView):
 #======================================= Update User View ============================================
 
 class UpdateUserAPIView(APIView):
-    permission_classes = [UserCheckOut]
+    permission_classes = [CheckOwnershipPermission]
     
     @extend_schema(
         request=UpdateUserSerializer,
