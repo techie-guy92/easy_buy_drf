@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'drf_spectacular',
     'django_filters',
+    'django_celery_results',
 ]
 
 MIDDLEWARE = [
@@ -253,3 +254,12 @@ SPECTACULAR_SETTINGS = {
     "VERSION" : "1.0.0",
     "SERVE_INCLUDE_SCHEMA" : False,
 }
+
+
+CELERY_BROKER_URL = 'amqp://localhost' 
+CELERY_RESULT_BACKEND = 'django-db'  # Store results in the database
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TIMEZONE = 'Asia/Tehran'  
+CELERY_ENABLE_UTC = True
