@@ -263,3 +263,11 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TIMEZONE = 'Asia/Tehran'  
 CELERY_ENABLE_UTC = True
+
+# CELERY_BEAT_SCHEDULE = {
+#     'check-premium-status': {
+#             'task': 'your_app_name.tasks.check_premium_status',
+#             'schedule': timedelta(hours=1),
+#         },
+#     }
+    
