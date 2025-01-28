@@ -33,7 +33,7 @@ class CustomUserAdmin(UserAdmin):
         ("Authentication", {"fields":("username", "password",)}),
     )
     
-    def get_add_fieldsets(self, request, obj=None):
+    def get_add_fieldsets(self, request, obj = None):
         add_fieldsets = list(self.add_fieldsets)
         if request.user.is_superuser:
             add_fieldsets += (

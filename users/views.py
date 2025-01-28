@@ -214,12 +214,12 @@ class PasswordResetAPIView(APIView):
         serializer = PasswordResetSerializer(data=request.data)
         if serializer.is_valid():
             email = serializer.validated_data["email"]
-            try:
-              user = CustomUser.objects.get(email=email)
-              reset_password_email(user)
-              return Response({"message": "ایمیل برای تغییر رمز عبور ارسال شد."}, status=status.HTTP_200_OK)
-            except CustomUser.DoesNotExist:
-              return Response({"error": "ایمیل وارد شده معنبر نمی باشد."}, status=status.HTTP_404_NOT_FOUND)
+            if CustomUser.objects.filter(email=email).exists():
+                user = CustomUser.objects.get(email=email)
+                reset_password_email(user)
+                return Response({"message": "ایمیل برای تغییر رمز عبور ارسال شد."}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "ایمیل وارد شده معنبر نمی باشد."}, status=status.HTTP_404_NOT_FOUND)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
   
   

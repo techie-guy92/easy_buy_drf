@@ -13,6 +13,8 @@ class CustomUserSerializer(serializers.ModelSerializer):
         fields = ["username", "first_name", "last_name", "email", "password", "re_password", "is_admin", "is_superuser"]
     
     def create(self, validated_data):
+        # This is a common pattern in Django for handling fields that you want to process separately from the rest of the validated data.
+        # if the key "is_superuser" is not found in the validated_data dictionary, the pop method will return False instead of raising a KeyError
         is_admin = validated_data.pop("is_admin", False)
         is_superuser = validated_data.pop("is_superuser", False)
         password = validated_data.pop("password", None)
@@ -84,6 +86,7 @@ class UpdateUserSerializer(serializers.ModelSerializer):
         }
 
     def update(self, instance, validated_data):
+        # The second parameter, instance.first_name, is the default value to return if "first_name" is not present in the validated_data dictionary.
         instance.first_name = validated_data.get("first_name", instance.first_name)
         instance.last_name = validated_data.get("last_name", instance.last_name)
         instance.email = validated_data.get("email", instance.email)
@@ -122,6 +125,10 @@ class SetNewPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError("رمز عبور باید متشکل از حروف کوچک، بزرگ و عدد باشد و همچنین هشت رقم داشته باشد.")
         return attrs
     
+    # This ensures that the password and re_password fields are removed at the final step before serialization, 
+    # regardless of how the rest of the data is handled throughout the serializer's methods.
+    # And using to_representation is the best practice and provides a clear, secure way to control the output of your serialized data.
+    # to_representation is effective in this context because it ensures that your data is properly managed up until the very last step, providing a more secure and organized approach.
     def to_representation(self, instance):
         data = super().to_representation(instance)
         data.pop("password", None)

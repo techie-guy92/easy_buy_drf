@@ -13,7 +13,7 @@ def upload_to(instance, filename):
     file_name, ext = path.splitext(filename)
     new_filename = f"{uuid4()}{ext}"
     user = instance.user
-    full_name = user.get_full_name().replace(" ", "")
+    full_name = user.get_full_name().replace(" ", "-")
     return f"images/users/{full_name}/{new_filename}"
 
 
