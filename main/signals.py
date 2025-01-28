@@ -22,7 +22,6 @@ def send_approval_email(user, product):
             Thank you for choosing us!</p>
         """
         email_sender(subject, message, html_content, [user.email])
-        print(verification_link)
     except Exception as error:
         logger.error(f"Failed to send approval email to {user.email}: {error}")
         raise

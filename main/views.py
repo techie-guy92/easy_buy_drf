@@ -101,12 +101,9 @@ class ProductDetailViewSet(viewsets.ReadOnlyModelViewSet):
             Filters the initial queryset to only include active products.
     """
     permission_classes = [IsPremiumOrOwnerPermission]
-    queryset = Product.objects.all()
+    queryset = Product.objects.filter(is_active=True)
     serializer_class = ProductDetailSerializer
     lookup_field = "slug"
-
-    def get_queryset(self):
-        return self.queryset.filter(is_active=True)
 
     def retrieve(self, request, *args, **kwargs):
         instance = self.get_object()
