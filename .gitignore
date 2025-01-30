@@ -19,3 +19,8 @@ venv/
 # Ignore other OS-specific files
 .DS_Store
 .codegpt
+
+# Ignore celery beat schedule files
+celerybeat-schedule
+celerybeat-schedule-shm
+celerybeat-schedule-wal
