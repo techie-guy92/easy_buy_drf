@@ -3,13 +3,11 @@ import os
 django.setup()
 os.environ["DJANGO_SETTINGS_MODULE"] = "core.settings"
 
-from django.test import TestCase
 from rest_framework.test import APIClient, APITestCase
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
-import jwt
+from jwt import decode
 from django.urls import resolve, reverse
-from django.contrib.auth import authenticate
 from django.core import mail
 from unittest.mock import patch
 from .models import *
@@ -48,7 +46,7 @@ user_data_2 = {
 
 #======================================== Sign Up Test ============================================
 
-class SignUpTest(TestCase):
+class SignUpTest(APITestCase):
     
     def setUp(self):
         self.url = reverse("signup")
@@ -117,7 +115,7 @@ class SignUpTest(TestCase):
 
 #======================================== Resend Verification Email Test ==============================
 
-class ResendVerificationEmailTest(TestCase):
+class ResendVerificationEmailTest(APITestCase):
     
     def setUp(self):
         self.url = reverse("resend-verification-email")
@@ -161,7 +159,7 @@ class ResendVerificationEmailTest(TestCase):
 
 #======================================== Verify Email Test =======================================
 
-class VerifyEmailTest(TestCase):
+class VerifyEmailTest(APITestCase):
     
     def setUp(self):
         self.url = reverse("verify-email")
@@ -195,7 +193,7 @@ class VerifyEmailTest(TestCase):
     
 #======================================== Login Test ================================================
 
-class LoginTest(TestCase):
+class LoginTest(APITestCase):
     
     def setUp(self):
         self.url = reverse("login")
@@ -229,7 +227,7 @@ class LoginTest(TestCase):
         
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("token", response.data)
-        decoded_token = jwt.decode(response.data["token"], settings.SECRET_KEY, algorithms=["HS256"])
+        decoded_token = decode(response.data["token"], settings.SECRET_KEY, algorithms=["HS256"])
         self.assertEqual(decoded_token["user_id"], self.user_1.id)
         
     def test_invalid_login_view(self):
@@ -252,7 +250,7 @@ class LoginTest(TestCase):
         
 #======================================== User Profile Test =========================================
 
-class UserProfileTest(TestCase):
+class UserProfileTest(APITestCase):
     
     def setUp(self):
         self.url = reverse("user-profile")
@@ -312,7 +310,7 @@ class UserProfileTest(TestCase):
         
 #======================================== Update User Test =========================================
 
-class UpdateUserTest(TestCase):
+class UpdateUserTest(APITestCase):
     
     def setUp(self):
         self.url = reverse("update-user")
@@ -355,7 +353,7 @@ class UpdateUserTest(TestCase):
 
 #======================================== Password Reset Test ======================================
 
-class PasswordResetTest(TestCase):
+class PasswordResetTest(APITestCase):
     
     def setUp(self):
         self.url = reverse("password-reset")
@@ -399,7 +397,7 @@ class PasswordResetTest(TestCase):
 
 #======================================== Set New Password Test ====================================
 
-class SetNewPasswordTest(TestCase):
+class SetNewPasswordTest(APITestCase):
     
     def setUp(self):
         self.url = reverse("set-new-password")
@@ -461,7 +459,7 @@ class SetNewPasswordTest(TestCase):
 
 #======================================== Fetch Users Test =========================================
 
-class FetchUsersTest(TestCase):
+class FetchUsersTest(APITestCase):
     
     def setUp(self):
         self.url = reverse("fetch-users-list")
