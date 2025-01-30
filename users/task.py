@@ -5,16 +5,28 @@ from datetime import timedelta
 from .models import *
 
 
-# celery -A core.celery_config worker --loglevel=info
+# Start the Celery worker
+# celery -A easy_buy worker --loglevel=info
+
+# Start Celery beat
+# celery -A easy_buy beat --loglevel=info
+
 
 #==================================== UpdateSubscription Model ==========================================
 
-# @shared_task
-# def check_premium_status():
-#     now = timezone.now()
-#     users = CustomUser.objects.filter(is_premium=True, premium_expiry_date__lt=now)
-#     users.update(is_premium=False)
-    
+@shared_task
+def check_premium_subscriptions():
+    now = timezone.now()
+    expired_subscriptions = PremiumSubscription.objects.filter(end_date__lt=now)
+
+    for subscription in expired_subscriptions:
+        user = subscription.user
+        user.is_premium = False
+        user.save()
+        subscription.delete()  # delete the expired subscription
+
+    print(f"Checked premium subscriptions at {now}")
+
     
 #========================================================================================================
 

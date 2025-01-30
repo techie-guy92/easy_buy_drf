@@ -14,6 +14,7 @@ from pathlib import Path
 from os import path
 from datetime import timedelta
 import environ
+from celery.schedules import crontab
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -58,6 +59,7 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_filters',
     'django_celery_results',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -256,18 +258,19 @@ SPECTACULAR_SETTINGS = {
 }
 
 
+# Celery Configuration Settings
 CELERY_BROKER_URL = 'amqp://techie-guy92:Soheil0014@localhost:5672//'
 CELERY_RESULT_BACKEND = 'django-db'  # Store results in the database
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TIMEZONE = 'Asia/Tehran'  
+CELERY_TIMEZONE = 'Asia/Tehran'
 CELERY_ENABLE_UTC = True
 
-# CELERY_BEAT_SCHEDULE = {
-#     'check-premium-status': {
-#             'task': 'your_app_name.tasks.check_premium_status',
-#             'schedule': timedelta(hours=1),
-#         },
-#     }
-    
+# Celery Beat Scheduler
+CELERY_BEAT_SCHEDULE = {
+    'check-premium-subscriptions-every-day': {
+        'task': 'users.tasks.check_premium_subscriptions',
+        'schedule': crontab(hour=0, minute=0),
+    },
+}
