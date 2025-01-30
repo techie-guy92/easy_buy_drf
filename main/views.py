@@ -32,13 +32,16 @@ class ProductAddAPIView(APIView):
         data["user"] = request.user.id
         serializer = ProductSerializer(data=data)
         if serializer.is_valid():
-            product = serializer.save()
-            # category_name = str(product.category)
-            product_name = str(product.product)
-            slug = f"{request.user.username}-{product_name}"
-            product.slug = slugify(slug, allow_unicode=True)
-            product.save()
-            return Response({"message": "محصول شما ثبت شد، و پس از تایید کارشناسان درج خواهد شد."}, status=status.HTTP_201_CREATED)
+            try:
+                product = serializer.save()
+                # category_name = str(product.category)
+                product_name = str(product.product)
+                slug = f"{request.user.username}-{product_name}"
+                product.slug = slugify(slug, allow_unicode=True)
+                product.save()
+                return Response({"message": "محصول شما ثبت شد، و پس از تایید کارشناسان درج خواهد شد."}, status=status.HTTP_201_CREATED)
+            except Exception as error:
+                return Response({"error": str(error)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
