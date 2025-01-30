@@ -96,7 +96,7 @@ class ResendVerificationEmailAPIView(APIView):
             confirm_email_address(user)
             return Response({"message": "ایمیل تایید دوباره ارسال شد."}, status=status.HTTP_201_CREATED)
         except CustomUser.DoesNotExist:
-            return Response({"error": "نام کاربری مورد نظر یافت نشد."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "نام کاربری مورد نظر یافت نشد."}, status=status.HTTP_404_NOT_FOUND)
 
 
 #======================================= Verify Email View ===========================================
@@ -126,7 +126,7 @@ class VerifyEmailAPIView(APIView):
                 user.is_active = True
                 user.save()
                 return Response({"message": "ثبت نام شما کامل شد."}, status=status.HTTP_200_OK)
-            return Response({"message": f"کاربر {user.username} قبلا تایید شده است."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"message": f"کاربر {user.username} قبلا تایید شده است."}, status=status.HTTP_202_ACCEPTED)
         except InvalidToken:
                 return Response({"error": "توکن معنبر نیست."}, status=status.HTTP_400_BAD_REQUEST)
         except TokenError:
@@ -154,7 +154,7 @@ class LoginAPIView(APIView):
                 return Response({"token": str(token)}, status=status.HTTP_200_OK)
             return Response({"error": "نام کاربری و یا رمز عبور اشتباه است."}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        
+
         
 #======================================= User Profile View ===========================================
 
