@@ -1,16 +1,13 @@
 from celery import shared_task
-from time import sleep
 from django.utils import timezone
-from datetime import timedelta
 from .models import *
 
 
 # Start the Celery worker
-# celery -A easy_buy worker --loglevel=info
+# celery -A core.celery_config worker --loglevel=info
 
 # Start Celery beat
-# celery -A easy_buy beat --loglevel=info
-
+# celery -A core.celery_config beat --loglevel=info
 
 #==================================== UpdateSubscription Model ==========================================
 
@@ -26,6 +23,7 @@ def check_premium_subscriptions():
         subscription.delete()  # delete the expired subscription
 
     print(f"Checked premium subscriptions at {now}")
+
 
     
 #========================================================================================================
