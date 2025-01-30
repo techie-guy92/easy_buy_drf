@@ -3,12 +3,9 @@ import os
 django.setup()
 os.environ["DJANGO_SETTINGS_MODULE"] = "core.settings"
 
-from django.test import TestCase
 from rest_framework.test import APIClient, APITestCase
 from rest_framework import status
 from django.urls import resolve, reverse
-from model_bakery.baker import make
-import pytz
 from users.models import *
 from main.models import *
 from .urls import *
