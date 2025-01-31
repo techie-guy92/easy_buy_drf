@@ -35,10 +35,10 @@ class Category(models.Model):
     
     def category_name(self):
         if "-" in self.category:
-            category_part_1, category_part_2 = self.category.split("-", 1) 
-            return f"{category_part_1} {category_part_2}"
+            part_1, part_2 = self.category.split("-", 1)
+            return part_1
         return self.category
-      
+    
     def __str__(self):
         return self.category_name()
 
