@@ -120,6 +120,9 @@ class PremiumSubscription(models.Model):
     def __str__(self):
         return f"{self.user.username}"
 
+    def is_expired(self):
+        return self.end_date < timezone.now()
+    
     class Meta:
         verbose_name = "PremiumSubscription"
         verbose_name_plural = "PremiumSubscriptions"

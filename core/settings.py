@@ -268,9 +268,16 @@ CELERY_TIMEZONE = 'Asia/Tehran'
 CELERY_ENABLE_UTC = True
 
 # Celery Beat Scheduler
+# CELERY_BEAT_SCHEDULE = {
+#     'check-premium-subscriptions-every-day': {
+#         'task': 'users.tasks.check_premium_subscriptions',
+#         'schedule': crontab(hour=0, minute=0),
+#     },
+# }
+
 CELERY_BEAT_SCHEDULE = {
-    'check-premium-subscriptions-every-day': {
+    'check-premium-subscriptions-every-minute': {
         'task': 'users.tasks.check_premium_subscriptions',
-        'schedule': crontab(hour=0, minute=0),
+        'schedule': crontab(),  
     },
 }
