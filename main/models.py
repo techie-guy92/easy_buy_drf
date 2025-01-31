@@ -34,8 +34,10 @@ class Category(models.Model):
     image= models.ImageField(upload_to=upload_to, blank=True, null=True, verbose_name="Image")
     
     def category_name(self):
-        category_part_1,  category_part_2= self.category.split("-")
-        return category_part_1
+        if "-" in self.category:
+            category_part_1, category_part_2 = self.category.split("-", 1) 
+            return f"{category_part_1} {category_part_2}"
+        return self.category
       
     def __str__(self):
         return self.category_name()

@@ -213,7 +213,7 @@ class ProductDetailTest(APITestCase):
     
     def setUp(self):
         self.client = APIClient()
-        self.url = reverse("product")
+        self.url = reverse("product", kwargs={"slug": "apple-phone-7plus"})
         
         self.user_1 = CustomUser.objects.create(
             username=user_data_1["username"],
@@ -231,6 +231,7 @@ class ProductDetailTest(APITestCase):
             last_name=user_data_2["last_name"],
             email=user_data_2["email"]
         )
+        self.user_2.is_premium = True
         self.user_2.is_active = user_data_2["is_active"]
         self.user_2.is_admin = user_data_2["is_admin"]
         self.user_2.is_superuser = user_data_2["is_superuser"]
@@ -261,13 +262,20 @@ class ProductDetailTest(APITestCase):
         self.product_2.save()
     
     def test_product_detail_serializer(self):
-        pass 
-    
+        serializer = ProductDetailSerializer(self.product_1)
+        serializer_data = serializer.data
+        self.assertEqual(serializer_data["slug"], self.product_1.slug)
+        self.assertIn("username", serializer_data)
+        self.assertIn("email", serializer_data)
+
     def test_product_detail_view(self):
-        pass 
+        self.client.force_authenticate(user=self.user_2)
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data["product"], self.product_1.product)
     
     def test_product_detail_url(self):
-        view = resolve("/product/")
+        view = resolve("/product/apple-phone-7plus/")
         self.assertEqual(view.func.cls, ProductDetailViewSet)
         
 
