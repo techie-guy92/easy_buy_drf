@@ -269,9 +269,8 @@ SPECTACULAR_SETTINGS = {
 }
 
 
-# Celery Configuration Settings
-CELERY_BROKER_URL = 'amqp://techie-guy92:Soheil0014@localhost:5672//'
-CELERY_RESULT_BACKEND = 'django-db'  # Store results in the database
+CELERY_BROKER_URL = env('URL_BROKER')
+CELERY_RESULT_BACKEND = 'django-db'  
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
