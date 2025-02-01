@@ -5,6 +5,7 @@ from .models import *
 
 # Start the Celery worker
 # celery -A core.celery_config worker --pool=solo --loglevel=info
+# celery -A core.celery_config worker --loglevel=info
 
 
 # Start Celery beat

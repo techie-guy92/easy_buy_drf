@@ -1,24 +1,21 @@
 from django.dispatch import receiver
 from django.db.models.signals import post_save
 from django.utils import timezone
+from logging import getLogger
 from .models import *
 from utilities import *
 
 
 #==================================== UpdateSubscription Model ==========================================
 
+logging = getLogger(__name__)
+ 
+
 @receiver(post_save, sender=Payment)
 def update_subscription(sender, instance, **kwargs):
     if instance.payment_status == "completed":
         instance.process_payment()
 
-
-
-# users/signals.py
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.utils import timezone
-from .models import PremiumSubscription
 
 @receiver(post_save, sender=PremiumSubscription)
 def check_subscription_expiration(sender, instance, **kwargs):
@@ -36,7 +33,4 @@ def check_subscription_expiration(sender, instance, **kwargs):
         print(f"Subscription not expired: {instance.end_date} >= {timezone.now()}")
 
 
-
-        
-        
 #========================================================================================================
