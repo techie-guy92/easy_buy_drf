@@ -217,6 +217,12 @@ LOGGING = {
             'filename': 'debug.log',
             'formatter': 'verbose',
         },
+        'file_celery': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'celery.log',
+            'formatter': 'verbose',
+        },
         'console': {
             'level': 'INFO',
             'class': 'logging.StreamHandler',
@@ -226,6 +232,11 @@ LOGGING = {
     'loggers': {
         'django': {
             'handlers': ['console', 'file_error', 'file_warning', 'file_debug'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'celery': {
+            'handlers': ['file_celery'],
             'level': 'DEBUG',
             'propagate': False,
         },
@@ -266,14 +277,6 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TIMEZONE = 'Asia/Tehran'
 CELERY_ENABLE_UTC = True
-
-# Celery Beat Scheduler
-# CELERY_BEAT_SCHEDULE = {
-#     'check-premium-subscriptions-every-day': {
-#         'task': 'users.tasks.check_premium_subscriptions',
-#         'schedule': crontab(hour=0, minute=0),
-#     },
-# }
 
 CELERY_BEAT_SCHEDULE = {
     'check-premium-subscriptions-every-minute': {

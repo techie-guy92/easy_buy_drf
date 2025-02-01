@@ -8,29 +8,29 @@ from utilities import *
 
 #==================================== UpdateSubscription Model ==========================================
 
-logging = getLogger(__name__)
- 
+logger = getLogger("celery")
+
 
 @receiver(post_save, sender=Payment)
 def update_subscription(sender, instance, **kwargs):
     if instance.payment_status == "completed":
         instance.process_payment()
-
+        logger.info(f"Processed payment for user: {instance.user.username}")
 
 @receiver(post_save, sender=PremiumSubscription)
 def check_subscription_expiration(sender, instance, **kwargs):
-    print(f"Signal triggered for subscription: {instance}")
-    print(f"Current time: {timezone.now()}")
-    print(f"Subscription end time: {instance.end_date}")
+    logger.debug(f"Signal triggered for subscription: {instance}")
+    logger.debug(f"Current time: {timezone.now()}")
+    logger.debug(f"Subscription end time: {instance.end_date}")
 
     if instance.is_expired():
-        print(f"Subscription expired: {instance}")
+        logger.info(f"Subscription expired: {instance}")
         user = instance.user
         user.is_premium = False
         user.save()
-        print(f"Updated user: {user.username} is_premium: {user.is_premium}")
+        logger.info(f"Updated user: {user.username} is_premium: {user.is_premium}")
     else:
-        print(f"Subscription not expired: {instance.end_date} >= {timezone.now()}")
+        logger.info(f"Subscription not expired: {instance.end_date} >= {timezone.now()}")
 
 
 #========================================================================================================

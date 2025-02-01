@@ -1,5 +1,6 @@
 from celery import shared_task
 from django.utils import timezone
+from logging import getLogger
 from .models import *
 
 
@@ -13,21 +14,23 @@ from .models import *
 
 #==================================== UpdateSubscription Model ==========================================
 
+logger = getLogger("celery")
+
+
 @shared_task
 def check_premium_subscriptions():
     now = timezone.now()
     expired_subscriptions = PremiumSubscription.objects.filter(end_date__lt=now)
-
-    print(f"Expired subscriptions: {expired_subscriptions}")
+    logger.debug(f"Expired subscriptions: {expired_subscriptions}")
     
     for subscription in expired_subscriptions:
         user = subscription.user
         user.is_premium = False
         user.save()
-        print(f"Updated user: {user.username} is_premium: {user.is_premium}")
+        logger.debug(f"Updated user: {user.username} is_premium: {user.is_premium}")
         subscription.delete() 
 
-    print(f"Checked premium subscriptions at {now}")
+    logger.info(f"Checked premium subscriptions at {now}")
 
 
 #========================================================================================================
