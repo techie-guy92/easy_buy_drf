@@ -1,12 +1,13 @@
 from celery import shared_task
-from django.utils import timezone
 from logging import getLogger
+from django.utils import timezone
 from .models import *
 
 
 # Start the Celery worker
-# celery -A core.celery_config worker --pool=solo --loglevel=info
-# celery -A core.celery_config worker --loglevel=info
+# on Windows: celery -A core.celery_config worker --pool=solo --loglevel=info
+# on Linux:   celery -A core.celery_config worker --loglevel=info
+# on Linux:   celery -A core.celery_config worker --pool=solo --loglevel=info -B
 
 
 # Start Celery beat

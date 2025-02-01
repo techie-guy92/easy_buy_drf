@@ -279,8 +279,8 @@ CELERY_TIMEZONE = 'Asia/Tehran'
 CELERY_ENABLE_UTC = True
 
 CELERY_BEAT_SCHEDULE = {
-    'check-premium-subscriptions-every-minute': {
+    'check-premium-subscriptions-every-five-minute': {
         'task': 'users.tasks.check_premium_subscriptions',
-        'schedule': crontab(),  
+        'schedule': crontab(minute='*/5'),  
     },
 }
