@@ -21,14 +21,16 @@ logger = getLogger("celery")
 @shared_task
 def check_premium_subscriptions():
     now = timezone.now()
+    logger.debug(f"Checking for expired subscriptions at {now}")
     expired_subscriptions = PremiumSubscription.objects.filter(end_date__lt=now)
-    logger.debug(f"Expired subscriptions: {expired_subscriptions}")
+    logger.info(f"Expired subscriptions: {expired_subscriptions}")
     
     for subscription in expired_subscriptions:
+        logger.debug(f"Processing subscription: {subscription}")
         user = subscription.user
         user.is_premium = False
         user.save()
-        logger.debug(f"Updated user: {user.username} is_premium: {user.is_premium}")
+        logger.info(f"Updated user: {user.username} is_premium: {user.is_premium}")
         subscription.delete() 
 
     logger.info(f"Checked premium subscriptions at {now}")
