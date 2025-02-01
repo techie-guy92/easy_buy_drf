@@ -13,7 +13,6 @@ app = Celery('easy_buy')
 
 app.config_from_object("django.conf:settings", namespace="CELERY")
 
-logger.info("Auto-discovering tasks...")  
 app.autodiscover_tasks(lambda: settings.INSTALLED_APPS)
 
 

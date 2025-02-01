@@ -31,8 +31,7 @@ def check_premium_subscriptions():
         user.is_premium = False
         user.save()
         logger.info(f"Updated user: {user.username} is_premium: {user.is_premium}")
-        subscription.delete() 
-
+        subscription.delete()
     logger.info(f"Checked premium subscriptions at {now}")
 
 
