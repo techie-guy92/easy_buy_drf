@@ -19,16 +19,20 @@ def update_subscription(sender, instance, **kwargs):
 
 @receiver(post_save, sender=PremiumSubscription)
 def check_subscription_expiration(sender, instance, **kwargs):
-    logger.debug(f"Signal triggered for subscription: {instance}\tCurrent time: {timezone.now()}\tExpiry: {instance.end_date}")
+    try:
+        logger.debug(f"Signal triggered for subscription: {instance}\tCurrent time: {timezone.now()}\tExpiry: {instance.end_date}")
 
-    if instance.is_expired():
-        logger.info(f"Subscription expired: {instance}")
-        user = instance.user
-        user.is_premium = False
-        user.save()
-        logger.info(f"Updated user: {user.username} is_premium: {user.is_premium}")
-    else:
-        logger.info(f"Subscription not expired: {instance.end_date} >= {timezone.now()}")
+        if instance.is_expired():
+            logger.info(f"Subscription expired: {instance}")
+            user = instance.user
+            user.is_premium = False
+            user.save()
+            logger.info(f"Updated user: {user.username} is_premium: {user.is_premium}")
+        else:
+            logger.info(f"Subscription not expired: {instance.end_date} >= {timezone.now()}")
+    except Exception as e:
+        logger.error(f"Error in check_subscription_expiration: {e}")
+
 
 
 #========================================================================================================
