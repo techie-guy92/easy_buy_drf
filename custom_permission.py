@@ -22,6 +22,11 @@ class CheckOwnershipPermission(BasePermission):
 
 #======================================== User Check Out Premium ====================================
 
+# When a user sends a request, both methods are called, but at different stages:
+# 1. **`has_permission`**: This is called first to check if the user has general permission to access the view. If this check fails, the request is denied immediately, and `has_object_permission` is never called.
+# 2. **`has_object_permission`**: If `has_permission` returns `True`, then for each object being accessed, `has_object_permission` is called to check if the user has specific permissions for that object.
+# This ensures that both view-level and object-level permissions are properly enforced.
+
 class IsPremiumOrOwnerPermission(BasePermission):
     message = "You are not allowed, you need to be the owner or have a premium account."
 
@@ -36,8 +41,6 @@ class IsPremiumOrOwnerPermission(BasePermission):
 
     def has_object_permission(self, request: Request, view, obj):
         logger.debug(f"has_object_permission invoked for User: {request.user}")
-        # This condition allows HEAD and OPTIONS requests to pass through without additional permission checks, 
-        # while GET requests continue to follow the default behavior and still require the has_object_permission checks.
         if request.method in SAFE_METHODS and request.method != "GET":
             logger.debug(f"Request method {request.method} is safe, allowing access.")
             return True
